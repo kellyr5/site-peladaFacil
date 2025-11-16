@@ -32,30 +32,38 @@ if ! docker ps &> /dev/null; then
     exit 1
 fi
 
-# Subir containers
-echo -e "${BLUE}[1/5] Subindo containers Docker...${NC}"
-docker-compose up -d
+# Parar containers antigos
+echo -e "${BLUE}[1/6] Parando containers antigos (se existirem)...${NC}"
+docker-compose down &> /dev/null
+
+# Construir e subir containers
+echo -e "${BLUE}[2/6] Construindo e subindo containers Docker...${NC}"
+docker-compose up -d --build
 
 echo ""
-echo -e "${BLUE}[2/5] Aguardando banco de dados iniciar...${NC}"
-sleep 10
+echo -e "${BLUE}[3/6] Aguardando banco de dados iniciar...${NC}"
+sleep 15
 
-# Verificar se precisa rodar migrações (primeira execução)
-if ! docker exec peladafacil-backend npx prisma migrate status &> /dev/null; then
-    echo -e "${BLUE}[3/5] Primeira execução detectada! Configurando banco de dados...${NC}"
-    docker exec peladafacil-backend npx prisma generate
-    docker exec peladafacil-backend npx prisma migrate deploy
+# Instalar dependências
+echo -e "${BLUE}[4/6] Instalando dependências do backend...${NC}"
+docker exec peladafacil-backend npm install
 
-    echo -e "${BLUE}[4/5] Populando banco com dados de exemplo...${NC}"
+# Configurar banco
+echo -e "${BLUE}[5/6] Configurando banco de dados...${NC}"
+docker exec peladafacil-backend npx prisma generate
+docker exec peladafacil-backend npx prisma migrate deploy
+
+# Popular banco (somente se necessário)
+if docker exec peladafacil-backend npx prisma migrate status | grep -q "up to date"; then
+    echo "Populando banco com dados de exemplo..."
     docker exec peladafacil-backend npx prisma db seed
 else
-    echo -e "${GREEN}[3/5] Banco de dados já configurado!${NC}"
-    echo -e "${GREEN}[4/5] Pulando seed...${NC}"
+    echo "Banco já possui dados!"
 fi
 
 echo ""
-echo -e "${BLUE}[5/5] Aguardando aplicação iniciar...${NC}"
-sleep 15
+echo -e "${BLUE}[6/6] Aguardando aplicação iniciar...${NC}"
+sleep 20
 
 echo ""
 echo -e "${GREEN}========================================"
