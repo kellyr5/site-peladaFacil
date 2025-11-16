@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🏆 Pelada Fácil - Launcher</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #22c55e 0%, #3b82f6 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 24px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 600px;
+            width: 100%;
+            padding: 40px;
+            animation: slideUp 0.5s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .logo {
+            font-size: 80px;
+            margin-bottom: 10px;
+        }
+
+        h1 {
+            color: #22c55e;
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: #6b7280;
+            font-size: 16px;
+        }
+
+        .status {
+            background: #f3f4f6;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+
+        .status-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .status-item:last-child {
+            border-bottom: none;
+        }
+
+        .status-label {
+            color: #4b5563;
+            font-weight: 500;
+        }
+
+        .status-value {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .status-checking {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .status-online {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .status-offline {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .buttons {
+            display: grid;
+            gap: 15px;
+        }
+
+        .btn {
+            padding: 16px 24px;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-primary {
+            background: #22c55e;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #16a34a;
+        }
+
+        .btn-secondary {
+            background: #3b82f6;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #2563eb;
+        }
+
+        .btn-danger {
+            background: #ef4444;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #dc2626;
+        }
+
+        .btn-outline {
+            background: white;
+            color: #4b5563;
+            border: 2px solid #e5e7eb;
+        }
+
+        .btn-outline:hover {
+            background: #f9fafb;
+            border-color: #d1d5db;
+        }
+
+        .info {
+            background: #eff6ff;
+            border: 1px solid #bfdbfe;
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 30px;
+        }
+
+        .info h3 {
+            color: #1e40af;
+            font-size: 16px;
+            margin-bottom: 10px;
+        }
+
+        .info p {
+            color: #3b82f6;
+            font-size: 14px;
+            margin-bottom: 5px;
+        }
+
+        .emoji {
+            font-size: 24px;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">🏆</div>
+            <h1>Pelada Fácil</h1>
+            <p class="subtitle">A Revolução do Esporte Amador</p>
+        </div>
+
+        <div class="status">
+            <div class="status-item">
+                <span class="status-label">Frontend (http://localhost:3000)</span>
+                <span class="status-value status-checking" id="frontend-status">
+                    <div class="loading"></div>
+                </span>
+            </div>
+            <div class="status-item">
+                <span class="status-label">Backend (http://localhost:3001)</span>
+                <span class="status-value status-checking" id="backend-status">
+                    <div class="loading"></div>
+                </span>
+            </div>
+        </div>
+
+        <div class="buttons">
+            <button class="btn btn-primary" onclick="openApp()" id="open-btn" disabled>
+                <span class="emoji">🚀</span>
+                <span>Verificando...</span>
+            </button>
+
+            <button class="btn btn-secondary" onclick="openDocs()">
+                <span class="emoji">📚</span>
+                <span>Ver Documentação</span>
+            </button>
+
+            <button class="btn btn-outline" onclick="openPrisma()">
+                <span class="emoji">💾</span>
+                <span>Prisma Studio (Banco de Dados)</span>
+            </button>
+        </div>
+
+        <div class="info">
+            <h3>👤 Usuários de Teste</h3>
+            <p><strong>Admin:</strong> admin@peladafacil.com / admin123</p>
+            <p><strong>Usuário:</strong> user1@email.com / senha123</p>
+        </div>
+
+        <div class="info" style="margin-top: 15px; background: #fef3c7; border-color: #fde68a;">
+            <h3 style="color: #92400e;">⚠️ Aplicação não está rodando?</h3>
+            <p style="color: #78350f;">Execute o arquivo <strong>INICIAR.bat</strong> (Windows) ou <strong>INICIAR.sh</strong> (Linux/Mac)</p>
+        </div>
+    </div>
+
+    <script>
+        let frontendOnline = false;
+        let backendOnline = false;
+
+        async function checkStatus() {
+            // Check Frontend
+            try {
+                const frontendResponse = await fetch('http://localhost:3000', {
+                    method: 'HEAD',
+                    mode: 'no-cors',
+                    cache: 'no-cache'
+                });
+                frontendOnline = true;
+                updateStatus('frontend-status', 'Online', true);
+            } catch (error) {
+                frontendOnline = false;
+                updateStatus('frontend-status', 'Offline', false);
+            }
+
+            // Check Backend
+            try {
+                const backendResponse = await fetch('http://localhost:3001/health', {
+                    method: 'GET',
+                    cache: 'no-cache'
+                });
+                backendOnline = backendResponse.ok;
+                updateStatus('backend-status', 'Online', true);
+            } catch (error) {
+                backendOnline = false;
+                updateStatus('backend-status', 'Offline', false);
+            }
+
+            // Update button
+            const openBtn = document.getElementById('open-btn');
+            if (frontendOnline && backendOnline) {
+                openBtn.disabled = false;
+                openBtn.innerHTML = '<span class="emoji">🚀</span><span>Abrir Pelada Fácil</span>';
+                openBtn.classList.remove('btn-secondary');
+                openBtn.classList.add('btn-primary');
+            } else {
+                openBtn.disabled = true;
+                openBtn.innerHTML = '<span class="emoji">⚠️</span><span>Aplicação Offline - Execute INICIAR.bat</span>';
+                openBtn.classList.remove('btn-primary');
+                openBtn.classList.add('btn-secondary');
+            }
+        }
+
+        function updateStatus(elementId, text, online) {
+            const element = document.getElementById(elementId);
+            element.textContent = text;
+            element.className = 'status-value ' + (online ? 'status-online' : 'status-offline');
+        }
+
+        function openApp() {
+            if (frontendOnline) {
+                window.open('http://localhost:3000', '_blank');
+            }
+        }
+
+        function openDocs() {
+            const url = 'file://' + window.location.pathname.replace('LAUNCHER.html', 'GUIA_EXECUTAVEIS.md');
+            window.open('GUIA_EXECUTAVEIS.md', '_blank');
+        }
+
+        function openPrisma() {
+            window.open('http://localhost:5555', '_blank');
+            alert('Para abrir o Prisma Studio, execute:\n\ndocker exec -it peladafacil-backend npx prisma studio\n\nE acesse http://localhost:5555');
+        }
+
+        // Check status on load
+        checkStatus();
+
+        // Check status every 5 seconds
+        setInterval(checkStatus, 5000);
+    </script>
+</body>
+</html>

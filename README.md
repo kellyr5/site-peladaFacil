@@ -71,19 +71,42 @@ Uma plataforma para tudo:
 
 ## 🚀 Como Rodar o Projeto
 
-### Pré-requisitos
+### ⚡ FORMA MAIS FÁCIL (Recomendada)
+
+**Apenas 1 clique!** Use os scripts executáveis:
+
+#### Windows:
+1. Dê **duplo clique** em `INICIAR.bat`
+2. Aguarde a configuração automática
+3. O navegador abrirá automaticamente!
+
+#### Linux/Mac:
+1. Dê **duplo clique** em `INICIAR.sh` (ou execute `./INICIAR.sh`)
+2. Aguarde a configuração automática
+3. Acesse http://localhost:3000
+
+#### 🎨 Launcher Visual:
+Abra o arquivo `LAUNCHER.html` no navegador para uma interface gráfica!
+
+**📚 Guia completo:** Veja [GUIA_EXECUTAVEIS.md](./GUIA_EXECUTAVEIS.md)
+
+---
+
+### 🔧 Forma Manual
+
+#### Pré-requisitos
 - **Node.js** 20+
 - **Docker** e **Docker Compose**
 - **Git**
 
-### 1. Clone o repositório
+#### 1. Clone o repositório
 
 \`\`\`bash
 git clone https://github.com/kellyr5/site-peladaFacil.git
 cd site-peladaFacil
 \`\`\`
 
-### 2. Configure as variáveis de ambiente
+#### 2. Configure as variáveis de ambiente
 
 **Backend:**
 \`\`\`bash
@@ -99,7 +122,7 @@ cp .env.local.example .env.local
 # Edite o arquivo .env.local com suas configurações
 \`\`\`
 
-### 3. Suba os containers com Docker Compose
+#### 3. Suba os containers com Docker Compose
 
 **Opção 1: Com Docker (Recomendado)**
 \`\`\`bash
@@ -130,13 +153,13 @@ npm install
 npm run dev
 \`\`\`
 
-### 4. Acesse a aplicação
+#### 4. Acesse a aplicação
 
 - **Frontend:** http://localhost:3000
 - **Backend API:** http://localhost:3001
 - **Prisma Studio:** Execute \`npx prisma studio\` no diretório \`backend\`
 
-### 5. Usuários de teste
+#### 5. Usuários de teste
 
 Após rodar o seed, você terá acesso a usuários de exemplo:
 
