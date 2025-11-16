@@ -1,0 +1,399 @@
+// Pelada Fácil - Database Schema
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Enums
+enum UserRole {
+  PLAYER
+  ADMIN
+}
+
+enum Sport {
+  FOOTBALL
+  FUTSAL
+  VOLLEYBALL
+  BASKETBALL
+  TENNIS
+  PADEL
+}
+
+enum MatchType {
+  CASUAL
+  CHAMPIONSHIP
+}
+
+enum MatchStatus {
+  OPEN
+  FULL
+  ONGOING
+  FINISHED
+  CANCELLED
+}
+
+enum ChampionshipFormat {
+  LEAGUE
+  KNOCKOUT
+  GROUPS
+}
+
+enum ChampionshipStatus {
+  UPCOMING
+  ONGOING
+  FINISHED
+}
+
+enum RequestStatus {
+  OPEN
+  ACCEPTED
+  CANCELLED
+}
+
+enum RequestUrgency {
+  LOW
+  MEDIUM
+  HIGH
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  REFUNDED
+}
+
+enum Position {
+  // Football/Futsal
+  GOALKEEPER
+  DEFENDER
+  MIDFIELDER
+  FORWARD
+
+  // Volleyball
+  SETTER
+  OPPOSITE
+  OUTSIDE_HITTER
+  MIDDLE_BLOCKER
+  LIBERO
+
+  // Basketball
+  POINT_GUARD
+  SHOOTING_GUARD
+  SMALL_FORWARD
+  POWER_FORWARD
+  CENTER
+
+  // Tennis/Padel
+  SINGLES
+  DOUBLES
+}
+
+// Models
+
+model User {
+  id                String    @id @default(uuid())
+  email             String    @unique
+  password          String
+  name              String
+  avatar            String?
+  phone             String?
+  birthDate         DateTime?
+  bio               String?
+  city              String?
+  state             String?
+  latitude          Float?
+  longitude         Float?
+  preferredSports   Sport[]
+  preferredPositions Position[]
+  level             Int       @default(1)
+  xp                Int       @default(0)
+  rating            Float     @default(0)
+  totalRatings      Int       @default(0)
+  isAvailable       Boolean   @default(false)
+  role              UserRole  @default(PLAYER)
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  // Relations
+  organizedMatches     Match[]             @relation("MatchOrganizer")
+  matchParticipations  MatchPlayer[]
+  teamMemberships      TeamPlayer[]
+  organizedChampionships Championship[]    @relation("ChampionshipOrganizer")
+  stats                PlayerStats[]
+  achievements         UserAchievement[]
+  ratingsGiven         Rating[]            @relation("RatingFrom")
+  ratingsReceived      Rating[]            @relation("RatingTo")
+  marketRequests       MarketRequest[]     @relation("MarketRequester")
+  marketResponses      MarketRequest[]     @relation("MarketResponder")
+  payments             Payment[]
+  notifications        Notification[]
+
+  @@index([email])
+  @@index([latitude, longitude])
+  @@index([isAvailable])
+}
+
+model Match {
+  id            String       @id @default(uuid())
+  type          MatchType
+  sport         Sport
+  name          String
+  description   String?
+  date          DateTime
+  locationName  String
+  address       String
+  latitude      Float
+  longitude     Float
+  organizerId   String
+  maxPlayers    Int
+  currentPlayers Int         @default(0)
+  cost          Float        @default(0)
+  status        MatchStatus  @default(OPEN)
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+
+  // Relations
+  organizer        User            @relation("MatchOrganizer", fields: [organizerId], references: [id])
+  players          MatchPlayer[]
+  teams            Team[]
+  championshipId   String?
+  championship     Championship?   @relation(fields: [championshipId], references: [id])
+  marketRequests   MarketRequest[]
+  payments         Payment[]
+  ratings          Rating[]
+
+  @@index([organizerId])
+  @@index([date])
+  @@index([sport])
+  @@index([status])
+  @@index([latitude, longitude])
+}
+
+model MatchPlayer {
+  id          String   @id @default(uuid())
+  matchId     String
+  userId      String
+  teamId      String?
+  position    Position?
+  checkedIn   Boolean  @default(false)
+  hasPaid     Boolean  @default(false)
+  goals       Int      @default(0)
+  assists     Int      @default(0)
+  yellowCards Int      @default(0)
+  redCards    Int      @default(0)
+  isMVP       Boolean  @default(false)
+  createdAt   DateTime @default(now())
+
+  // Relations
+  match       Match    @relation(fields: [matchId], references: [id], onDelete: Cascade)
+  user        User     @relation(fields: [userId], references: [id])
+  team        Team?    @relation(fields: [teamId], references: [id])
+
+  @@unique([matchId, userId])
+  @@index([matchId])
+  @@index([userId])
+}
+
+model Team {
+  id          String   @id @default(uuid())
+  name        String
+  color       String?
+  matchId     String?
+  championshipId String?
+  score       Int      @default(0)
+  createdAt   DateTime @default(now())
+
+  // Relations
+  match        Match?        @relation(fields: [matchId], references: [id], onDelete: Cascade)
+  championship Championship? @relation(fields: [championshipId], references: [id], onDelete: Cascade)
+  players      TeamPlayer[]
+  matchPlayers MatchPlayer[]
+
+  @@index([matchId])
+  @@index([championshipId])
+}
+
+model TeamPlayer {
+  id        String   @id @default(uuid())
+  teamId    String
+  userId    String
+  position  Position?
+  isCaptain Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  // Relations
+  team      Team     @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id])
+
+  @@unique([teamId, userId])
+  @@index([teamId])
+  @@index([userId])
+}
+
+model Championship {
+  id          String              @id @default(uuid())
+  name        String
+  description String?
+  sport       Sport
+  organizerId String
+  startDate   DateTime
+  endDate     DateTime
+  format      ChampionshipFormat
+  maxTeams    Int
+  cost        Float               @default(0)
+  status      ChampionshipStatus  @default(UPCOMING)
+  createdAt   DateTime            @default(now())
+  updatedAt   DateTime            @updatedAt
+
+  // Relations
+  organizer   User                @relation("ChampionshipOrganizer", fields: [organizerId], references: [id])
+  teams       Team[]
+  matches     Match[]
+
+  @@index([organizerId])
+  @@index([sport])
+  @@index([status])
+}
+
+model PlayerStats {
+  id            String   @id @default(uuid())
+  userId        String
+  sport         Sport
+  matchesPlayed Int      @default(0)
+  wins          Int      @default(0)
+  draws         Int      @default(0)
+  losses        Int      @default(0)
+  goals         Int      @default(0)
+  assists       Int      @default(0)
+  yellowCards   Int      @default(0)
+  redCards      Int      @default(0)
+  mvpCount      Int      @default(0)
+  updatedAt     DateTime @updatedAt
+
+  // Relations
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, sport])
+  @@index([userId])
+  @@index([sport])
+}
+
+model Achievement {
+  id          String   @id @default(uuid())
+  name        String
+  description String
+  icon        String
+  type        String   // 'goals', 'matches', 'wins', 'special'
+  requirement Json     // {type: 'goals', value: 100}
+  createdAt   DateTime @default(now())
+
+  // Relations
+  userAchievements UserAchievement[]
+
+  @@index([type])
+}
+
+model UserAchievement {
+  id            String   @id @default(uuid())
+  userId        String
+  achievementId String
+  unlockedAt    DateTime @default(now())
+
+  // Relations
+  user          User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  achievement   Achievement @relation(fields: [achievementId], references: [id])
+
+  @@unique([userId, achievementId])
+  @@index([userId])
+}
+
+model Rating {
+  id          String   @id @default(uuid())
+  fromUserId  String
+  toUserId    String
+  matchId     String
+  rating      Int      // 1-5
+  comment     String?
+  technique   Int?     // 1-5
+  teamwork    Int?     // 1-5
+  punctuality Int?     // 1-5
+  attitude    Int?     // 1-5
+  createdAt   DateTime @default(now())
+
+  // Relations
+  fromUser    User     @relation("RatingFrom", fields: [fromUserId], references: [id])
+  toUser      User     @relation("RatingTo", fields: [toUserId], references: [id], onDelete: Cascade)
+  match       Match    @relation(fields: [matchId], references: [id])
+
+  @@unique([fromUserId, toUserId, matchId])
+  @@index([toUserId])
+  @@index([matchId])
+}
+
+model MarketRequest {
+  id          String          @id @default(uuid())
+  matchId     String
+  requesterId String
+  sport       Sport
+  position    Position?
+  urgency     RequestUrgency
+  latitude    Float
+  longitude   Float
+  radius      Int             @default(10) // km
+  status      RequestStatus   @default(OPEN)
+  responderId String?
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+
+  // Relations
+  match       Match           @relation(fields: [matchId], references: [id], onDelete: Cascade)
+  requester   User            @relation("MarketRequester", fields: [requesterId], references: [id])
+  responder   User?           @relation("MarketResponder", fields: [responderId], references: [id])
+
+  @@index([matchId])
+  @@index([status])
+  @@index([latitude, longitude])
+  @@index([sport])
+}
+
+model Payment {
+  id          String        @id @default(uuid())
+  matchId     String
+  userId      String
+  amount      Float
+  status      PaymentStatus @default(PENDING)
+  method      String        // 'credit_card', 'pix', 'cash'
+  externalId  String?       // Mercado Pago transaction ID
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  // Relations
+  match       Match         @relation(fields: [matchId], references: [id])
+  user        User          @relation(fields: [userId], references: [id])
+
+  @@index([matchId])
+  @@index([userId])
+  @@index([status])
+}
+
+model Notification {
+  id        String   @id @default(uuid())
+  userId    String
+  title     String
+  message   String
+  type      String   // 'match_invite', 'market_request', 'rating', 'achievement'
+  data      Json?    // Additional data
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  // Relations
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([read])
+  @@index([createdAt])
+}
